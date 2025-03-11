@@ -4,6 +4,7 @@ This repository serves as a comprehensive learning resource for Django REST Fram
 
 ## 📚 Additional Documentation
 
+- [User Guide](USER_GUIDE.md) - Step-by-step instructions on using and extending the API
 - [API Overview](API_OVERVIEW.md) - Complete overview of all API endpoints and functionality
 - [Postman Guide](POSTMAN_GUIDE.md) - Detailed instructions for testing the API with Postman
 
@@ -589,33 +590,6 @@ python manage.py shell
 # Load sample data
 python manage.py shell < create_sample_data.py
 ```
-
-## �� What I've Learned
-
-By building this project, I've learned:
-
-1. **Django Basics**: Models, admin, migrations, settings
-2. **Django REST Framework**: Serializers, ViewSets, routers
-3. **REST API Concepts**: Resources, HTTP methods, CRUD operations
-4. **API Documentation**: Using Swagger and ReDoc
-5. **API Testing**: Using Django test framework and Postman
-
-## 📚 Additional Learning Resources
-
-- [Django Documentation](https://docs.djangoproject.com/)
-- [Django REST Framework Documentation](https://www.django-rest-framework.org/)
-- [REST API Best Practices](https://restfulapi.net/)
-- [Postman Learning Center](https://learning.postman.com/)
-
-## 🛠️ Next Steps
-
-Now that I've built a basic REST API, I could:
-
-1. Add user authentication and permissions
-2. Implement more complex filtering and searching
-3. Create relationships between models (e.g., tasks belonging to projects)
-4. Deploy the API to a production server
-5. Build a frontend application to consume the API
 
 ## 🤝 Contributing
 
