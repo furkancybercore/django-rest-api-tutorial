@@ -265,6 +265,64 @@ You can filter and search persons using query parameters:
 3. The `search_fields` specify which fields are searched
 4. Django REST Framework applies the filters to the queryset
 
+### 7. Updating a Person's Profile with Validation
+
+The API provides a dedicated endpoint for updating a person's profile with extra validation:
+
+- Send a PUT request (full update) to http://127.0.0.1:8000/api/persons/1/profile_update/
+- Send a PATCH request (partial update) to http://127.0.0.1:8000/api/persons/1/profile_update/
+
+**Example JSON for updating a profile**:
+```json
+{
+    "name": "John Doe Updated",
+    "email": "john.updated@example.com",
+    "confirm_email": "john.updated@example.com",
+    "phone": "+1111222333",
+    "department": "Software Development"
+}
+```
+
+**Special validations**:
+- Name must be at least 2 characters long
+- Email must be unique (not used by another person)
+- If changing email, you can provide `confirm_email` to confirm the change
+- Authentication is required (you must be logged in)
+
+**Successful response**:
+```json
+{
+    "status": "success",
+    "message": "Profile updated successfully",
+    "data": {
+        "name": "John Doe Updated",
+        "email": "john.updated@example.com",
+        "phone": "+1111222333",
+        "department": "Software Development"
+    }
+}
+```
+
+**How the code handles this**:
+1. The URL `/api/persons/{id}/profile_update/` maps to the `profile_update` action in `PersonViewSet`
+2. Authentication is verified using `permission_classes=[IsAuthenticated]`
+3. Django REST Framework uses `ProfileUpdateSerializer` with specialized validation
+4. If valid, the person's profile is updated in the database
+5. A structured response with status and message is returned
+
+**Error handling**:
+If validation fails, a detailed error response is provided:
+```json
+{
+    "status": "error",
+    "message": "Profile update failed",
+    "errors": {
+        "email": ["This email is already in use."],
+        "confirm_email": ["Email addresses do not match."]
+    }
+}
+```
+
 ## Task Assignment
 
 The API allows you to assign tasks to persons and manage these assignments.

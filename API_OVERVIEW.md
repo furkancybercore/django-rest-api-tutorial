@@ -35,6 +35,8 @@ All API endpoints are prefixed with `/api/`.
 | GET         | `/api/persons/{id}/tasks/`   | List all tasks assigned to a person |
 | POST        | `/api/persons/{id}/assign_task/`| Assign a task to a person        |
 | POST        | `/api/persons/{id}/unassign_task/`| Unassign a task from a person  |
+| PUT         | `/api/persons/{id}/profile_update/`| Update a person's profile with validation |
+| PATCH       | `/api/persons/{id}/profile_update/`| Partially update a person's profile with validation |
 
 ### Authentication Endpoints
 
@@ -154,6 +156,35 @@ POST /api/persons/
 }
 ```
 
+### Updating a Person's Profile (JSON)
+
+```json
+PUT /api/persons/1/profile_update/
+{
+    "name": "John Doe Updated",
+    "email": "john.updated@example.com",
+    "confirm_email": "john.updated@example.com",
+    "phone": "+1234567890",
+    "department": "Software Development"
+}
+```
+
+The profile update endpoint includes special validations:
+- Email format validation
+- Email uniqueness validation
+- Email confirmation (optional)
+- Name length validation (minimum 2 characters)
+- Authentication required
+
+You can also use PATCH for partial updates:
+
+```json
+PATCH /api/persons/1/profile_update/
+{
+    "department": "Research & Development"
+}
+```
+
 ### Assigning a Task to a Person (JSON)
 
 ```json
@@ -176,4 +207,4 @@ POST /api/persons/1/assign_task/
 
 - [Django REST Framework Documentation](https://www.django-rest-framework.org/)
 - [Postman Guide](POSTMAN_GUIDE.md) - Guide for testing the API with Postman
-- [User Guide](USER_GUIDE.md) - Step-by-step instructions on using and extending the API 
+- [User Guide](USER_GUIDE.md) - Step-by-step instructions on using and extending the API

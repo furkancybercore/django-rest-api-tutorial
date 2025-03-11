@@ -397,6 +397,76 @@ Before you can test the API, you need to ensure the Django development server is
 - Status code: 204 No Content
 - No response body
 
+### Update a Person's Profile with Validation
+
+1. Create a new request in your collection
+2. Set the request method to PUT
+3. Set the URL to `http://127.0.0.1:8000/api/persons/1/profile_update/` (replace 1 with the ID of a person)
+4. Go to the "Body" tab
+5. Select "raw" and "JSON" format
+6. Enter the following JSON data:
+```json
+{
+    "name": "John Doe Updated",
+    "email": "john.updated@example.com",
+    "confirm_email": "john.updated@example.com",
+    "phone": "+1111222333",
+    "department": "Software Development"
+}
+```
+7. Go to the "Authorization" tab
+8. Select "Basic Auth" from the Type dropdown
+9. Enter your username and password (required for this endpoint)
+10. Save the request as "Update Person Profile"
+11. Click "Send" to execute the request
+
+**Expected Response:**
+```json
+{
+    "status": "success",
+    "message": "Profile updated successfully",
+    "data": {
+        "name": "John Doe Updated",
+        "email": "john.updated@example.com",
+        "phone": "+1111222333",
+        "department": "Software Development"
+    }
+}
+```
+
+### Partially Update a Person's Profile with Validation
+
+1. Create a new request in your collection
+2. Set the request method to PATCH
+3. Set the URL to `http://127.0.0.1:8000/api/persons/1/profile_update/` (replace 1 with the ID of a person)
+4. Go to the "Body" tab
+5. Select "raw" and "JSON" format
+6. Enter the following JSON data (just the fields you want to update):
+```json
+{
+    "department": "Research & Development"
+}
+```
+7. Go to the "Authorization" tab
+8. Select "Basic Auth" from the Type dropdown
+9. Enter your username and password (required for this endpoint)
+10. Save the request as "Partial Update Person Profile"
+11. Click "Send" to execute the request
+
+**Expected Response:**
+```json
+{
+    "status": "success",
+    "message": "Profile updated successfully",
+    "data": {
+        "name": "John Doe Updated",
+        "email": "john.updated@example.com",
+        "phone": "+1111222333",
+        "department": "Research & Development"
+    }
+}
+```
+
 ## Task Assignment
 
 ### View Tasks Assigned to a Person
