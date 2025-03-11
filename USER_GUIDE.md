@@ -7,10 +7,12 @@ This guide explains how to use the Task Manager API with step-by-step instructio
 1. [Getting Started](#getting-started)
 2. [Running the Application](#running-the-application)
 3. [Basic Use Cases](#basic-use-cases)
-4. [Advanced Use Cases](#advanced-use-cases)
-5. [Understanding the Code Flow](#understanding-the-code-flow)
-6. [Extending the Application](#extending-the-application)
-7. [Troubleshooting](#troubleshooting)
+4. [Person Management](#person-management)
+5. [Task Assignment](#task-assignment)
+6. [Advanced Use Cases](#advanced-use-cases)
+7. [Understanding the Code Flow](#understanding-the-code-flow)
+8. [Extending the Application](#extending-the-application)
+9. [Troubleshooting](#troubleshooting)
 
 ## Getting Started
 
@@ -162,6 +164,193 @@ To delete a task:
 1. The URL `/api/tasks/{id}/` with DELETE maps to the `destroy` action in `TaskViewSet`
 2. Django REST Framework deletes the task from the database
 3. A 204 No Content response is returned
+
+## Person Management
+
+The API allows you to manage persons who can be assigned tasks. Each person has a name, email, phone number, and department.
+
+### 1. Viewing All Persons
+
+To view all persons, you can:
+- Visit http://127.0.0.1:8000/api/persons/ in your browser
+- Send a GET request to this endpoint using Postman
+
+**How the code handles this**:
+1. The URL `/api/persons/` maps to the `list` action in `PersonViewSet`
+2. Django REST Framework calls `get_queryset()` to retrieve all persons
+3. The `get_serializer_class()` method selects `PersonSerializer` for list views
+4. The persons are serialized to JSON and returned with pagination
+
+### 2. Creating a New Person
+
+To create a new person:
+- Send a POST request to http://127.0.0.1:8000/api/persons/ with JSON data
+- Use the Django admin at http://127.0.0.1:8000/admin/tasks/person/add/
+
+**Example JSON for creating a person**:
+```json
+{
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "+1234567890",
+    "department": "Engineering"
+}
+```
+
+**Required fields**:
+- `name`: The person's full name (string)
+- `email`: The person's email address (string)
+
+**Optional fields**:
+- `phone`: The person's phone number (string)
+- `department`: The person's department (string)
+
+**How the code handles this**:
+1. The URL `/api/persons/` with POST method maps to the `create` action in `PersonViewSet`
+2. Django REST Framework uses `PersonSerializer` to validate and convert the JSON data
+3. If valid, a new Person instance is created in the database
+4. The created person is serialized and returned with a 201 Created status
+
+### 3. Viewing a Specific Person
+
+To view details of a specific person:
+- Visit http://127.0.0.1:8000/api/persons/1/ (replace "1" with the person ID)
+- Send a GET request to this endpoint using Postman
+
+**How the code handles this**:
+1. The URL `/api/persons/{id}/` maps to the `retrieve` action in `PersonViewSet`
+2. Django REST Framework fetches the person with the specified ID
+3. The person is serialized using `PersonWithTasksSerializer` (includes assigned tasks)
+4. The serialized person is returned as JSON
+
+### 4. Updating a Person
+
+To update a person:
+- Send a PUT request (full update) to http://127.0.0.1:8000/api/persons/1/
+- Send a PATCH request (partial update) to http://127.0.0.1:8000/api/persons/1/
+
+**Example JSON for updating a person's department**:
+```json
+{
+    "department": "Marketing"
+}
+```
+
+**How the code handles this**:
+1. The URL `/api/persons/{id}/` with PUT/PATCH maps to `update`/`partial_update` in `PersonViewSet`
+2. Django REST Framework uses `PersonSerializer` to validate the data
+3. The person is updated in the database
+4. The updated person is serialized and returned
+
+### 5. Deleting a Person
+
+To delete a person:
+- Send a DELETE request to http://127.0.0.1:8000/api/persons/1/
+
+**How the code handles this**:
+1. The URL `/api/persons/{id}/` with DELETE maps to the `destroy` action in `PersonViewSet`
+2. Django REST Framework deletes the person from the database
+3. A 204 No Content response is returned
+
+### 6. Filtering and Searching Persons
+
+You can filter and search persons using query parameters:
+
+- By department: http://127.0.0.1:8000/api/persons/?department=Engineering
+- Search by name or email: http://127.0.0.1:8000/api/persons/?search=john
+
+**How the code handles this**:
+1. The `filter_backends` in `PersonViewSet` includes `DjangoFilterBackend` and `SearchFilter`
+2. The `filterset_fields` specify which fields can be used for filtering
+3. The `search_fields` specify which fields are searched
+4. Django REST Framework applies the filters to the queryset
+
+## Task Assignment
+
+The API allows you to assign tasks to persons and manage these assignments.
+
+### 1. Viewing Tasks Assigned to a Person
+
+To view all tasks assigned to a specific person:
+- Visit http://127.0.0.1:8000/api/persons/1/tasks/ (replace "1" with the person ID)
+- Send a GET request to this endpoint using Postman
+
+**How the code handles this**:
+1. The URL `/api/persons/{id}/tasks/` maps to the `tasks` action in `PersonViewSet`
+2. The method retrieves all tasks where `assigned_to` equals the specified person ID
+3. The tasks are serialized using `TaskListSerializer`
+4. The serialized tasks are returned as JSON
+
+### 2. Assigning a Task to a Person
+
+There are two ways to assign a task to a person:
+
+**Method 1: From the Person endpoint**
+- Send a POST request to http://127.0.0.1:8000/api/persons/1/assign_task/ with JSON data:
+```json
+{
+    "task_id": 5
+}
+```
+
+**Method 2: From the Task endpoint**
+- Send a POST request to http://127.0.0.1:8000/api/tasks/5/assign_person/ with JSON data:
+```json
+{
+    "person_id": 1
+}
+```
+
+**How the code handles this**:
+1. The endpoint maps to either the `assign_task` action in `PersonViewSet` or the `assign_person` action in `TaskViewSet`
+2. The method validates that both the person and task exist
+3. It checks if the task is already assigned to someone else
+4. If all checks pass, it updates the task's `assigned_to` field
+5. The updated task is serialized and returned
+
+### 3. Unassigning a Task from a Person
+
+Similarly, there are two ways to unassign a task:
+
+**Method 1: From the Person endpoint**
+- Send a POST request to http://127.0.0.1:8000/api/persons/1/unassign_task/ with JSON data:
+```json
+{
+    "task_id": 5
+}
+```
+
+**Method 2: From the Task endpoint**
+- Send a POST request to http://127.0.0.1:8000/api/tasks/5/unassign_person/
+
+**How the code handles this**:
+1. The endpoint maps to either the `unassign_task` action in `PersonViewSet` or the `unassign_person` action in `TaskViewSet`
+2. The method validates that the task is currently assigned to the specified person
+3. If valid, it sets the task's `assigned_to` field to `None`
+4. The updated task is serialized and returned
+
+### 4. Viewing Unassigned Tasks
+
+To view all tasks that are not assigned to any person:
+- Visit http://127.0.0.1:8000/api/tasks/unassigned_tasks/
+- Send a GET request to this endpoint using Postman
+
+**How the code handles this**:
+1. The URL `/api/tasks/unassigned_tasks/` maps to the `unassigned_tasks` action in `TaskViewSet`
+2. The method retrieves all tasks where `assigned_to` is `None`
+3. The tasks are serialized using `TaskListSerializer`
+4. The serialized tasks are returned as JSON
+
+### 5. Filtering Tasks by Assigned Person
+
+You can filter tasks by the person they're assigned to:
+- http://127.0.0.1:8000/api/tasks/?assigned_to=1 (tasks assigned to person with ID 1)
+- http://127.0.0.1:8000/api/tasks/?assigned_to__isnull=true (unassigned tasks)
+
+**How the code handles this**:
+1. The `filter_backends` in `TaskViewSet` includes `DjangoFilterBackend`
+2. The `filterset_fields` include `assigned_to`
+3. Django REST Framework applies the filter to the queryset
 
 ## Advanced Use Cases
 
@@ -316,6 +505,30 @@ To add a new model related to Task (e.g., "Project"):
    ```bash
    python manage.py makemigrations
    python manage.py migrate
+   ```
+
+### Adding Person-Related Features
+
+To extend the Person functionality (e.g., adding a "role" field):
+
+1. **Update the Person model** in `tasks/models.py`:
+   ```python
+   class Person(models.Model):
+       # Existing fields...
+       role = models.CharField(max_length=100, blank=True)
+   ```
+
+2. **Create and apply migrations**:
+   ```bash
+   python manage.py makemigrations
+   python manage.py migrate
+   ```
+
+3. The field will automatically be included in `PersonSerializer` (since it uses `fields = '__all__'`)
+
+4. You can then filter persons by role:
+   ```
+   http://127.0.0.1:8000/api/persons/?role=Manager
    ```
 
 ## Troubleshooting

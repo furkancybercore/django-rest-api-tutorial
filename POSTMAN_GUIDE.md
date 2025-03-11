@@ -6,11 +6,13 @@ This guide will help you test the Task Manager API using Postman.
 1. [Before You Begin](#before-you-begin)
 2. [Setting Up Postman](#setting-up-postman)
 3. [Creating a Collection](#creating-a-collection)
-4. [Basic CRUD Operations](#basic-crud-operations)
-5. [Custom Actions](#custom-actions)
-6. [Filtering and Searching](#filtering-and-searching)
-7. [Authentication](#authentication)
-8. [Troubleshooting](#troubleshooting)
+4. [Basic CRUD Operations for Tasks](#basic-crud-operations-for-tasks)
+5. [Person Management](#person-management)
+6. [Task Assignment](#task-assignment)
+7. [Custom Actions](#custom-actions)
+8. [Filtering and Searching](#filtering-and-searching)
+9. [Authentication](#authentication)
+10. [Troubleshooting](#troubleshooting)
 
 ## Before You Begin
 
@@ -46,7 +48,7 @@ Before you can test the API, you need to ensure the Django development server is
 3. Name your collection "Task Manager API"
 4. Save the collection
 
-## Basic CRUD Operations
+## Basic CRUD Operations for Tasks
 
 ### List All Tasks (GET)
 
@@ -220,6 +222,362 @@ Before you can test the API, you need to ensure the Django development server is
 - Status code: 204 No Content
 - No response body
 
+## Person Management
+
+### List All Persons (GET)
+
+1. Create a new request in your collection
+2. Set the request method to GET
+3. Set the URL to `http://127.0.0.1:8000/api/persons/`
+4. Save the request as "List All Persons"
+5. Click "Send" to execute the request
+
+**Expected Response:**
+```json
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "phone": "+1234567890",
+            "department": "Engineering",
+            "created_at": "2023-03-15T09:00:00Z",
+            "updated_at": "2023-03-15T09:00:00Z"
+        },
+        {
+            "id": 2,
+            "name": "Jane Smith",
+            "email": "jane.smith@example.com",
+            "phone": "+0987654321",
+            "department": "Marketing",
+            "created_at": "2023-03-15T10:00:00Z",
+            "updated_at": "2023-03-15T10:00:00Z"
+        }
+    ]
+}
+```
+
+### Create a Person (POST)
+
+1. Create a new request in your collection
+2. Set the request method to POST
+3. Set the URL to `http://127.0.0.1:8000/api/persons/`
+4. Go to the "Body" tab
+5. Select "raw" and "JSON" format
+6. Enter the following JSON data:
+```json
+{
+    "name": "Alice Johnson",
+    "email": "alice.johnson@example.com",
+    "phone": "+1122334455",
+    "department": "Human Resources"
+}
+```
+7. Save the request as "Create Person"
+8. Click "Send" to execute the request
+
+**Expected Response:**
+```json
+{
+    "id": 3,
+    "name": "Alice Johnson",
+    "email": "alice.johnson@example.com",
+    "phone": "+1122334455",
+    "department": "Human Resources",
+    "created_at": "2023-03-15T11:00:00Z",
+    "updated_at": "2023-03-15T11:00:00Z"
+}
+```
+
+### Retrieve a Person (GET)
+
+1. Create a new request in your collection
+2. Set the request method to GET
+3. Set the URL to `http://127.0.0.1:8000/api/persons/1/` (replace 1 with the ID of a person)
+4. Save the request as "Get Person Detail"
+5. Click "Send" to execute the request
+
+**Expected Response:**
+```json
+{
+    "id": 1,
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "+1234567890",
+    "department": "Engineering",
+    "created_at": "2023-03-15T09:00:00Z",
+    "updated_at": "2023-03-15T09:00:00Z",
+    "assigned_tasks": [
+        {
+            "id": 1,
+            "title": "Complete Django REST tutorial",
+            "status": "completed",
+            "priority": 1,
+            "due_date": "2023-03-20",
+            "completed": true
+        }
+    ]
+}
+```
+
+### Update a Person (PUT)
+
+1. Create a new request in your collection
+2. Set the request method to PUT
+3. Set the URL to `http://127.0.0.1:8000/api/persons/1/` (replace 1 with the ID of a person)
+4. Go to the "Body" tab
+5. Select "raw" and "JSON" format
+6. Enter the following JSON data:
+```json
+{
+    "name": "John Doe",
+    "email": "john.doe.updated@example.com",
+    "phone": "+1234567890",
+    "department": "Software Development"
+}
+```
+7. Save the request as "Update Person"
+8. Click "Send" to execute the request
+
+**Expected Response:**
+```json
+{
+    "id": 1,
+    "name": "John Doe",
+    "email": "john.doe.updated@example.com",
+    "phone": "+1234567890",
+    "department": "Software Development",
+    "created_at": "2023-03-15T09:00:00Z",
+    "updated_at": "2023-03-15T11:30:00Z"
+}
+```
+
+### Partial Update a Person (PATCH)
+
+1. Create a new request in your collection
+2. Set the request method to PATCH
+3. Set the URL to `http://127.0.0.1:8000/api/persons/2/` (replace 2 with the ID of a person)
+4. Go to the "Body" tab
+5. Select "raw" and "JSON" format
+6. Enter the following JSON data:
+```json
+{
+    "department": "Digital Marketing"
+}
+```
+7. Save the request as "Partial Update Person"
+8. Click "Send" to execute the request
+
+**Expected Response:**
+```json
+{
+    "id": 2,
+    "name": "Jane Smith",
+    "email": "jane.smith@example.com",
+    "phone": "+0987654321",
+    "department": "Digital Marketing",
+    "created_at": "2023-03-15T10:00:00Z",
+    "updated_at": "2023-03-15T11:45:00Z"
+}
+```
+
+### Delete a Person (DELETE)
+
+1. Create a new request in your collection
+2. Set the request method to DELETE
+3. Set the URL to `http://127.0.0.1:8000/api/persons/3/` (replace 3 with the ID of a person)
+4. Save the request as "Delete Person"
+5. Click "Send" to execute the request
+
+**Expected Response:**
+- Status code: 204 No Content
+- No response body
+
+## Task Assignment
+
+### View Tasks Assigned to a Person
+
+1. Create a new request in your collection
+2. Set the request method to GET
+3. Set the URL to `http://127.0.0.1:8000/api/persons/1/tasks/` (replace 1 with the ID of a person)
+4. Save the request as "View Person's Tasks"
+5. Click "Send" to execute the request
+
+**Expected Response:**
+```json
+[
+    {
+        "id": 1,
+        "title": "Complete Django REST tutorial",
+        "status": "completed",
+        "priority": 1,
+        "due_date": "2023-03-20",
+        "completed": true,
+        "assigned_to_name": "John Doe"
+    }
+]
+```
+
+### Assign a Task to a Person (from Person endpoint)
+
+1. Create a new request in your collection
+2. Set the request method to POST
+3. Set the URL to `http://127.0.0.1:8000/api/persons/1/assign_task/` (replace 1 with the ID of a person)
+4. Go to the "Body" tab
+5. Select "raw" and "JSON" format
+6. Enter the following JSON data:
+```json
+{
+    "task_id": 2
+}
+```
+7. Save the request as "Assign Task to Person"
+8. Click "Send" to execute the request
+
+**Expected Response:**
+```json
+{
+    "id": 2,
+    "title": "Practice REST API concepts",
+    "description": "",
+    "status": "in_progress",
+    "priority": 2,
+    "due_date": null,
+    "completed": false,
+    "assigned_to": 1,
+    "assigned_to_name": "John Doe",
+    "created_at": "2023-03-15T09:30:00Z",
+    "updated_at": "2023-03-15T12:00:00Z"
+}
+```
+
+### Assign a Task to a Person (from Task endpoint)
+
+1. Create a new request in your collection
+2. Set the request method to POST
+3. Set the URL to `http://127.0.0.1:8000/api/tasks/2/assign_person/` (replace 2 with the ID of a task)
+4. Go to the "Body" tab
+5. Select "raw" and "JSON" format
+6. Enter the following JSON data:
+```json
+{
+    "person_id": 2
+}
+```
+7. Save the request as "Assign Person to Task"
+8. Click "Send" to execute the request
+
+**Expected Response:**
+```json
+{
+    "id": 2,
+    "title": "Practice REST API concepts",
+    "description": "",
+    "status": "in_progress",
+    "priority": 2,
+    "due_date": null,
+    "completed": false,
+    "assigned_to": 2,
+    "assigned_to_name": "Jane Smith",
+    "created_at": "2023-03-15T09:30:00Z",
+    "updated_at": "2023-03-15T12:15:00Z"
+}
+```
+
+### Unassign a Task from a Person (from Person endpoint)
+
+1. Create a new request in your collection
+2. Set the request method to POST
+3. Set the URL to `http://127.0.0.1:8000/api/persons/2/unassign_task/` (replace 2 with the ID of a person)
+4. Go to the "Body" tab
+5. Select "raw" and "JSON" format
+6. Enter the following JSON data:
+```json
+{
+    "task_id": 2
+}
+```
+7. Save the request as "Unassign Task from Person"
+8. Click "Send" to execute the request
+
+**Expected Response:**
+```json
+{
+    "id": 2,
+    "title": "Practice REST API concepts",
+    "description": "",
+    "status": "in_progress",
+    "priority": 2,
+    "due_date": null,
+    "completed": false,
+    "assigned_to": null,
+    "assigned_to_name": null,
+    "created_at": "2023-03-15T09:30:00Z",
+    "updated_at": "2023-03-15T12:30:00Z"
+}
+```
+
+### Unassign a Task from a Person (from Task endpoint)
+
+1. Create a new request in your collection
+2. Set the request method to POST
+3. Set the URL to `http://127.0.0.1:8000/api/tasks/1/unassign_person/` (replace 1 with the ID of a task)
+4. Save the request as "Unassign Person from Task"
+5. Click "Send" to execute the request
+
+**Expected Response:**
+```json
+{
+    "id": 1,
+    "title": "Complete Django REST tutorial",
+    "description": "Complete the Django REST framework tutorial and understand the concepts",
+    "status": "completed",
+    "priority": 1,
+    "due_date": "2023-03-20",
+    "completed": true,
+    "assigned_to": null,
+    "assigned_to_name": null,
+    "created_at": "2023-03-15T09:00:00Z",
+    "updated_at": "2023-03-15T12:45:00Z"
+}
+```
+
+### View Unassigned Tasks
+
+1. Create a new request in your collection
+2. Set the request method to GET
+3. Set the URL to `http://127.0.0.1:8000/api/tasks/unassigned_tasks/`
+4. Save the request as "List Unassigned Tasks"
+5. Click "Send" to execute the request
+
+**Expected Response:**
+```json
+[
+    {
+        "id": 1,
+        "title": "Complete Django REST tutorial",
+        "status": "completed",
+        "priority": 1,
+        "due_date": "2023-03-20",
+        "completed": true,
+        "assigned_to_name": null
+    },
+    {
+        "id": 2,
+        "title": "Practice REST API concepts",
+        "status": "in_progress",
+        "priority": 2,
+        "due_date": null,
+        "completed": false,
+        "assigned_to_name": null
+    }
+]
+```
+
 ## Custom Actions
 
 ### List Completed Tasks
@@ -290,6 +648,38 @@ Before you can test the API, you need to ensure the Django development server is
 2. Set the request method to GET
 3. Set the URL to `http://127.0.0.1:8000/api/tasks/?ordering=priority`
 4. Save the request as "Order by Priority"
+5. Click "Send" to execute the request
+
+### Filter Persons by Department
+
+1. Create a new request in your collection
+2. Set the request method to GET
+3. Set the URL to `http://127.0.0.1:8000/api/persons/?department=Engineering`
+4. Save the request as "Filter Persons by Department"
+5. Click "Send" to execute the request
+
+### Search Persons
+
+1. Create a new request in your collection
+2. Set the request method to GET
+3. Set the URL to `http://127.0.0.1:8000/api/persons/?search=john`
+4. Save the request as "Search Persons"
+5. Click "Send" to execute the request
+
+### Filter Tasks by Assigned Person
+
+1. Create a new request in your collection
+2. Set the request method to GET
+3. Set the URL to `http://127.0.0.1:8000/api/tasks/?assigned_to=1` (replace 1 with the ID of a person)
+4. Save the request as "Filter Tasks by Assigned Person"
+5. Click "Send" to execute the request
+
+### Filter Unassigned Tasks
+
+1. Create a new request in your collection
+2. Set the request method to GET
+3. Set the URL to `http://127.0.0.1:8000/api/tasks/?assigned_to__isnull=true`
+4. Save the request as "Filter Unassigned Tasks"
 5. Click "Send" to execute the request
 
 ## Authentication
