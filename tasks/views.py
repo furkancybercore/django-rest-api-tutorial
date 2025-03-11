@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets, filters, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, permission_classes
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Task, Person
@@ -8,7 +9,8 @@ from .serializers import (
     TaskSerializer, 
     TaskListSerializer, 
     PersonSerializer, 
-    PersonWithTasksSerializer
+    PersonWithTasksSerializer,
+    ProfileUpdateSerializer
 )
 
 # Create your views here.
@@ -31,11 +33,48 @@ class PersonViewSet(viewsets.ModelViewSet):
         """
         Use different serializers for different actions:
         - retrieve: Use serializer with tasks
+        - profile_update: Use profile update serializer
         - other actions: Use the regular serializer
         """
         if self.action == 'retrieve' or self.action == 'tasks':
             return PersonWithTasksSerializer
+        elif self.action == 'profile_update':
+            return ProfileUpdateSerializer
         return PersonSerializer
+    
+    @action(detail=True, methods=['put', 'patch'], permission_classes=[IsAuthenticated])
+    def profile_update(self, request, pk=None):
+        """
+        Update a person's profile with validation.
+        
+        This endpoint requires authentication and provides extra validation
+        for profile fields like email and name.
+        
+        URL: /api/persons/{id}/profile_update/
+        Method: PUT or PATCH
+        """
+        person = self.get_object()
+        serializer = self.get_serializer(person, data=request.data, partial=self.request.method == 'PATCH')
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {
+                    "status": "success",
+                    "message": "Profile updated successfully",
+                    "data": serializer.data
+                }, 
+                status=status.HTTP_200_OK
+            )
+        
+        return Response(
+            {
+                "status": "error",
+                "message": "Profile update failed",
+                "errors": serializer.errors
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
     
     @action(detail=True, methods=['get'])
     def tasks(self, request, pk=None):
