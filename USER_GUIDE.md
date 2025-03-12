@@ -62,10 +62,21 @@ Before you begin, make sure you have:
 
 ## Running the Application
 
+Start virtual environment;
+
+```bash
+source venv/bin/activate
+```
 To start the development server:
 
 ```bash
 python manage.py runserver
+```
+
+if a server already working in background kill that server and try again;
+
+```bash
+pkill -9 -f "python manage.py runserver"
 ```
 
 This will start the server at http://127.0.0.1:8000/
@@ -85,10 +96,44 @@ To view all tasks, you can:
 - Send a GET request to this endpoint using Postman
 
 **How the code handles this**:
-1. The URL `/api/tasks/` maps to the `list` action in `TaskViewSet`
-2. Django REST Framework calls `get_queryset()` to retrieve all tasks
-3. The `get_serializer_class()` method selects `TaskListSerializer` for list views
-4. The tasks are serialized to JSON and returned with pagination
+
+1. **URL Routing**: 
+   - When you visit `/api/tasks/`, Django's URL router directs this request to the `TaskViewSet`.
+   - For a GET request to this URL, Django REST Framework automatically maps it to the `list` action.
+   - This happens because `TaskViewSet` inherits from `viewsets.ModelViewSet`, which provides standard CRUD operations.
+
+2. **Task Data Retrieval**:
+   - The `queryset = Task.objects.all()` line in `TaskViewSet` defines which data to retrieve from the database.
+   - This queryset gets all Task objects from the database using Django's ORM (Object-Relational Mapper).
+   - If any filters are applied (e.g., `/api/tasks/?status=completed`), they're processed by the `filter_backends` defined in the ViewSet.
+
+3. **Serializer Selection**:
+   ```python
+   def get_serializer_class(self):
+       if self.action == 'list':
+           return TaskListSerializer
+       return TaskSerializer
+   ```
+   - This method checks if the current action is `list` (showing all tasks)
+   - If so, it uses `TaskListSerializer` which typically includes fewer fields for a more concise overview
+   - For other actions (like retrieving a single task), it uses the full `TaskSerializer`
+
+4. **Data Serialization**:
+   - Django REST Framework internally calls `self.get_serializer(queryset, many=True)` to convert the database objects to JSON
+   - The serializer transforms each Task instance into a dictionary/JSON format
+   - It handles conversions between Python types and JSON-compatible types (e.g., datetime to string)
+
+5. **Pagination**:
+   - If pagination is configured in settings.py, Django REST Framework applies it automatically
+   - Instead of returning all tasks at once, it returns a specific "page" of results (e.g., 10 tasks per page)
+   - The response includes links to previous/next pages if available
+
+6. **Response Generation**:
+   - Django REST Framework creates an HTTP response with the serialized data
+   - It sets appropriate headers and status code (200 OK for successful retrieval)
+   - The data is formatted as JSON and sent back to the browser or client
+
+This entire process happens automatically when you inherit from `ModelViewSet` - you don't need to write any additional code for basic CRUD operations!
 
 ### 2. Creating a New Task
 
